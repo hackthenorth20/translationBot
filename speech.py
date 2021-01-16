@@ -6,8 +6,6 @@ from google.cloud import speech
 credential_path = "creds.json"
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credential_path
 
-client = speech.SpeechClient()
-
 
 # for result in response.results:
 #     print("Transcript: {}".format(result.alternatives[0].transcript))
