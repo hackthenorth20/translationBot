@@ -10,6 +10,7 @@ import time
 import threading
 from discord.ext import commands, tasks
 from translation import translateText
+from textToSpeech import tts
 from pydub import AudioSegment
 
 
@@ -19,7 +20,7 @@ discord.opus.is_loaded()
 user_audioMap = {}
 
 
-async def speachToText(ctx, file_name, j):
+async def speachToText(ctx, file_name, j, vc):
     global user_audioMap
     if os.stat(file_name).st_size == 0 and len(user_audioMap[str(ctx.author.id)]) != 0:
         local_map = user_audioMap[str(ctx.author.id)]
@@ -56,7 +57,13 @@ async def speachToText(ctx, file_name, j):
         text = recognizer.recognize_google(sr_audio_data, language="en-US")
         await ctx.send(text)
         # await speech.transcribe_streaming(ctx,f"combined_audio/{ctx.author.id}_{j}.wav")
-        await ctx.send(translateText(text, "fr"))
+        translatedText = translateText(text, "bn")
+        await ctx.send(translatedText)
+        tts("bn-IN", translatedText)
+        audio_source = discord.FFmpegPCMAudio("output.mp3")
+
+        if not vc.is_playing():
+            vc.play(audio_source, after=None)
 
     elif os.stat(file_name).st_size != 0:
         user_audioMap[str(ctx.author.id)].append(file_name)
@@ -86,9 +93,19 @@ class Ahmad(commands.Cog):
             await asyncio.sleep(2)
             vc.stop_listening()
             asyncio.get_event_loop().create_task(
-                speachToText(ctx, f"waves/wave{i}.wav", i)
+                speachToText(ctx, f"waves/wave{i}.wav", i, vc)
             )
             i += 1
+
+    @commands.command()
+    @commands.guild_only()
+    async def test(self, ctx):
+        channel = ctx.guild.get_channel(ctx.message.author.voice.channel.id)
+        vc = await channel.connect()
+        audio_source = discord.FFmpegPCMAudio("output.mp3")
+
+        if not vc.is_playing():
+            vc.play(audio_source, after=None)
 
     @commands.command()
     @commands.guild_only()
