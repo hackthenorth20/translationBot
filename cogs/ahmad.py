@@ -7,9 +7,10 @@ import ctypes
 import speech_recognition
 import ctypes.util
 import time
-import wave
+import speech
 import threading
 from discord.ext import commands, tasks
+from translation import translateText
 
 discord.opus.load_opus(ctypes.util.find_library('opus'))
 discord.opus.is_loaded()
@@ -22,23 +23,29 @@ async def speachToText(ctx,file_name,j):
         user_audioMap[str(ctx.author.id)] = []
         recognizer = speech_recognition.Recognizer()
         audios = []
+        
+        audioData = bytes()
         for i in local_map:
-            w = wave.open(i, 'rb')
-            audios.append( [w.getparams(), w.readframes(w.getnframes())] )
-            w.close()
-        os.system(f"rm TEST{j}.wav")
-        output = wave.open(f"TEST{j}.wav", 'wb')
-        output.setparams(audios[0][0])
+            audioData += open(i,"rb").read()
+            
+        os.system(f"rm combined_audio/{ctx.author.id}_{j}.wav")
+        file_handle = open(f"combined_audio/{ctx.author.id}_{j}.wav","wb").write(audioData)
+            
 
-        for i in range(len(audios)):
-            output.writeframes(audios[i][1])
-        output.close()
+        # output = wave.open(f"combined_audio/{ctx.author.id}_{j}.wav", 'wb')
+        # output.setparams(audios[0][0])
+        # for i in range(len(audios)):
+        #     output.writeframes(audios[i][1])
+        # output.close()
 
-        fp = open(f"TEST{j}.wav","rb")
+        fp = open(f"combined_audio/{ctx.author.id}_{j}.wav","rb")
         with speech_recognition.AudioFile(fp) as source:
             sr_audio_data = recognizer.record(source)
 
-        await ctx.send(recognizer.recognize_google(sr_audio_data, language='en-US'))    
+        text = recognizer.recognize_google(sr_audio_data, language='en-US')
+        await ctx.send(text)
+        # await speech.transcribe_streaming(ctx,f"combined_audio/{ctx.author.id}_{j}.wav") 
+        await ctx.send(translateText(text, "fr"))          
        
     elif os.stat(file_name).st_size != 0:
         user_audioMap[str(ctx.author.id)].append(file_name)
@@ -54,6 +61,7 @@ class Ahmad(commands.Cog):
         channel = ctx.guild.get_channel(ctx.message.author.voice.channel.id)
         vc = await channel.connect()
         (Path.cwd() / 'waves').mkdir(exist_ok=True)
+        (Path.cwd() / 'combined_audio').mkdir(exist_ok=True)
         i = 0
         global user_audioMap
         user_audioMap[str(ctx.author.id)] = []
@@ -61,7 +69,7 @@ class Ahmad(commands.Cog):
             (Path.cwd() / f'waves/wave{i}.wav').touch(exist_ok=True)
             fp = (Path.cwd() / f'waves/wave{i}.wav').open('rb')
             vc.listen(discord.UserFilter(discord.WaveSink(f'waves/wave{i}.wav'), ctx.author))
-            await asyncio.sleep(1.5)
+            await asyncio.sleep(2)
             vc.stop_listening()
             asyncio.get_event_loop().create_task(speachToText(ctx,f'waves/wave{i}.wav',i))
             i += 1
