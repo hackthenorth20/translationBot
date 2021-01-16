@@ -23,6 +23,100 @@ class Tamim(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+
+    #### Add team-roles on Reaction ####
+    @commands.Cog.listener()
+    @commands.guild_only()
+    async def on_raw_reaction_add(self, payload):
+        json_object = read_json()
+
+        if payload.channel.id != json_object['channel']:
+            return
+
+        if payload.user_id == botID:
+            return
+
+        guild = discord.utils.find(
+            lambda g: g.id == guildID, self.client.guilds)
+
+        member = discord.utils.find(
+            lambda m: m.id == payload.user_id, guild.members)
+        if member is None:
+            print("Member not found.")
+            return
+
+        roleName = None
+
+        for i in json_object['languages'].keys():
+            if json_object['languages'][i]["emojiID"] == payload.emoji.name:
+                roleName = json_object['languages'][i]["roleName"]
+                break
+
+        if roleName is None:
+            return
+
+        role = discord.utils.get(guild.roles, name=roleName)
+
+        # Create Embed
+        confirm_embed = discord.Embed(
+            title=f"Roles assigned for {member}", color=0x2af761)
+        confirm_embed.add_field(name="Member ID:", value=f"{member.id}")
+        confirm_embed.add_field(name="Added:", value=f"{role}", inline=False)
+        confirm_embed.set_thumbnail(url=f"{member.avatar_url}")
+
+        if role is None:
+            print("Role not found")
+        else:
+            await member.add_roles(role)
+            await member.send(embed=confirm_embed)
+
+    #### Add team-roles on Reaction ####
+    @commands.Cog.listener()
+    @commands.guild_only()
+    async def on_raw_reaction_remove(self, payload):
+        json_object = read_json()
+
+        if payload.channel.id != json_object['channel']:
+            return
+
+        # Excludes bot from role requests
+        if payload.user_id == botID:
+            return
+
+        guild = discord.utils.find(
+            lambda g: g.id == guildID, self.client.guilds)
+
+        member = discord.utils.find(
+            lambda m: m.id == payload.user_id, guild.members)
+        if member is None:
+            print("Member not found.")
+            return
+
+        roleName = None
+
+        for i in json_object['languages'].keys():
+            if json_object['languages'][i]["emojiID"] == payload.emoji.name:
+                roleName = json_object['languages'][i]["roleName"]
+                break
+
+        if roleName is None:
+            return
+
+        role = discord.utils.get(guild.roles, name=roleName)
+
+        # Create Embed
+        confirm_embed = discord.Embed(
+            title=f"Roles removed for {member}", color=0x2af761)
+        confirm_embed.add_field(name="Member ID:", value=f"{member.id}")
+        confirm_embed.add_field(name="Removed:", value=f"{role}", inline=False)
+        confirm_embed.set_thumbnail(url=f"{member.avatar_url}")
+
+        if role is None:
+            print("Role not found")
+        else:
+            await member.remove_roles(role)
+            await member.send(embed=confirm_embed)
+
     # Sets up channel for role reactions
     @commands.command()
     @commands.guild_only()
@@ -60,7 +154,7 @@ class Tamim(commands.Cog):
             new_message_content += '\n' + \
                 f'{emoji} => {lang}'
         await message.edit(content=new_message_content)
-    
+
 
 def setup(bot):
     bot.add_cog(Tamim(bot))

@@ -3,3 +3,6 @@ creds.json
 *combined_audio/
 *waves/
 *__pycache__/
+IDS.py
+language.json
+"language copy.json"
