@@ -1,2 +1,5 @@
 SECRET.py
 creds.json
+*combined_audio/
+*waves/
+*__pycache__/

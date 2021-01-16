@@ -3,7 +3,8 @@ import os
 
 from discord.ext import commands, tasks
 from discord.utils import get
-from SECRET import *
+from SECRET import TOKEN
+
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="$", intents=intents)
@@ -43,4 +44,5 @@ if __name__ == "__main__":
 async def stop(ctx):
     await bot.logout()
 
-bot.run(TOKEN) 
+
+bot.run(TOKEN)

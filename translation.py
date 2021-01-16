@@ -7,9 +7,12 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credential_path
 
 translate_client = translate.Client()
 
+
 def translateText(text, targetLang):
     if isinstance(text, six.binary_type):
         text = text.decode("utf-8")
 
-    result = translate_client.translate(text, target_language=targetLang, format_="text")
+    result = translate_client.translate(
+        text, target_language=targetLang, format_="text"
+    )
     return result["translatedText"]
