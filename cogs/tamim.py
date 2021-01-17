@@ -8,13 +8,33 @@ guildID = 766020518620299265
 
 def role_select(guild, emoji):
 
+    langs = ["en-US", "fr-CA", "es-ES", 'it-IT','de-DE', 'ru-RU', 'hi-IN','ja-JP', 'ko-KR']
+    emojis = ["1️⃣", "2️⃣", "3️⃣", '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
+
     role = None
+    for i in range(len(emojis)):
+        if emoji == emojis[i]:
+            role = discord.utils.get(guild.roles, name=lags[i])
+
     if emoji == "1️⃣":
         role = discord.utils.get(guild.roles, name="en-US")
     elif emoji == "2️⃣":
         role = discord.utils.get(guild.roles, name="fr-CA")
     elif emoji == "3️⃣":
         role = discord.utils.get(guild.roles, name="es-ES")
+    elif emoji == '4️⃣':
+        role = discord.utils.get(guild.roles, name="es-ES")
+    elif emoji == "5️⃣":
+        role = discord.utils.get(guild.roles, name="es-ES")
+    elif emoji == "6️⃣":
+        role = discord.utils.get(guild.roles, name="es-ES")
+    elif emoji == "7️⃣":
+        role = discord.utils.get(guild.roles, name="es-ES")
+    elif emoji == "8️⃣":
+        role = discord.utils.get(guild.roles, name="es-ES")
+    elif emoji == "9️⃣":
+        role = discord.utils.get(guild.roles, name="es-ES")
+
     print(role)
     # elif emoji == "4️⃣":
     #     role = discord.utils.get(guild.roles, name="4th Year")
@@ -107,8 +127,8 @@ class Tamim(commands.Cog):
         else:
             message = await ctx.send(f"{message_content}:")
 
-        langs = ["en-US", "fr-CA", "es-ES"]
-        emojis = ["1️⃣", "2️⃣", "3️⃣"]
+        langs = ["en-US", "fr-CA", "es-ES", 'it-IT','de-DE', 'ru-RU', 'hi-IN','ja-JP', 'ko-KR']
+        emojis = ["1️⃣", "2️⃣", "3️⃣", '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
 
         # Edit initial message
         new_message_content = "Choose a default language below."

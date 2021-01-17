@@ -95,10 +95,14 @@ class Ahmad(commands.Cog):
         channel = guild.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
 
+        if message.author.id != self.bot.user.id:
+            return
+
+
         if payload.emoji.name == "🎙️" and message.reactions[0].count == 2:
             micHolder = guild.get_member(payload.user_id)
             voiceChannel = micHolder.voice.channel
-            logging = guild.get_channel(800234160458956830)
+            logging = guild.get_channel(800262774445309963)
             listener = None
             for member in  voiceChannel.members:
                 if member != micHolder:

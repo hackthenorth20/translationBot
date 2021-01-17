@@ -18,6 +18,14 @@ def tts(lang, rawText):
         ssml_gender=texttospeech.SsmlVoiceGender.MALE,
     )
 
+    if voice is None:
+        voice = texttospeech.VoiceSelectionParams(
+            language_code=lang,
+            name=f"{lang}-Standard-A",
+            ssml_gender=texttospeech.SsmlVoiceGender.MALE,
+        )
+
+
     audio_config = texttospeech.AudioConfig(
         audio_encoding=texttospeech.AudioEncoding.MP3
     )
