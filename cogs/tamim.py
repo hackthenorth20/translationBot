@@ -37,7 +37,7 @@ class Tamim(commands.Cog):
             return
 
         guild = discord.utils.find(
-            lambda g: g.id == guildID, self.client.guilds)
+            lambda g: g.id == payload.guild.id, self.client.guilds)
 
         member = discord.utils.find(
             lambda m: m.id == payload.user_id, guild.members)
@@ -48,7 +48,7 @@ class Tamim(commands.Cog):
         roleName = None
 
         for i in json_object['languages'].keys():
-            if json_object['languages'][i]["emojiID"] == payload.emoji.name:
+            if json_object['languages'][i]["emojiName"] == payload.emoji.name:
                 roleName = json_object['languages'][i]["roleName"]
                 break
 
@@ -138,7 +138,7 @@ class Tamim(commands.Cog):
 
         for lang in json_object['languages']:
             emoji = discord.utils.get(
-                guild.emojis, name=json_object['languagess'][lang]["emojiID"])
+                guild.emojis, name=json_object['languagess'][lang]["emojiName"])
             await message.add_reaction(emoji)
 
         json_object["message"] = message.id
@@ -150,7 +150,7 @@ class Tamim(commands.Cog):
         new_message_content = json_object['messageContent']
         for lang in json_object['languages']:
             emoji = discord.utils.get(
-                guild.emojis, name=json_object['languages'][lang]["emojiID"])
+                guild.emojis, name=json_object['languages'][lang]["emojiName"])
             new_message_content += '\n' + \
                 f'{emoji} => {lang}'
         await message.edit(content=new_message_content)
