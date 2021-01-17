@@ -10,6 +10,7 @@ import time
 import threading
 from discord.ext import commands, tasks
 from translation import translateText
+from textToSpeech import tts
 from pydub import AudioSegment
 
 
@@ -19,7 +20,7 @@ discord.opus.is_loaded()
 user_audioMap = {}
 
 
-async def speachToText(ctx, file_name, j):
+async def speechToText(ctx, file_name, j, vc):
     global user_audioMap
     if os.stat(file_name).st_size == 0 and len(user_audioMap[str(ctx.author.id)]) != 0:
         local_map = user_audioMap[str(ctx.author.id)]
@@ -36,19 +37,6 @@ async def speachToText(ctx, file_name, j):
             f"combined_audio/{ctx.author.id}_{j}.wav", format="wav"
         )
 
-        # audioData = bytes()
-        # for i in local_map:
-        #     audioData += open(i,"rb").read()
-
-        # os.system(f"rm combined_audio/{ctx.author.id}_{j}.wav")
-        # file_handle = open(f"combined_audio/{ctx.author.id}_{j}.wav","wb").write(audioData)
-
-        # output = wave.open(f"combined_audio/{ctx.author.id}_{j}.wav", 'wb')
-        # output.setparams(audios[0][0])
-        # for i in range(len(audios)):
-        #     output.writeframes(audios[i][1])
-        # output.close()
-
         fp = open(f"combined_audio/{ctx.author.id}_{j}.wav", "rb")
         with speech_recognition.AudioFile(fp) as source:
             sr_audio_data = recognizer.record(source)
@@ -56,7 +44,13 @@ async def speachToText(ctx, file_name, j):
         text = recognizer.recognize_google(sr_audio_data, language="en-US")
         await ctx.send(text)
         # await speech.transcribe_streaming(ctx,f"combined_audio/{ctx.author.id}_{j}.wav")
-        await ctx.send(translateText(text, "fr"))
+        translatedText = translateText(text, "en")
+        await ctx.send(translatedText)
+        tts("en-US", translatedText)
+        audio_source = discord.FFmpegPCMAudio("output.mp3")
+
+        if not vc.is_playing():
+            vc.play(audio_source, after=None)
 
     elif os.stat(file_name).st_size != 0:
         user_audioMap[str(ctx.author.id)].append(file_name)
@@ -69,9 +63,8 @@ class Ahmad(commands.Cog):
     @commands.command()
     @commands.guild_only()
     async def join(self, ctx):
-        start = datetime.datetime.now()
-        channel = ctx.guild.get_channel(ctx.message.author.voice.channel.id)
-        vc = await channel.connect()
+        voiceChannel = ctx.author.voice.channel
+        vc = await voiceChannel.connect()
         (Path.cwd() / "waves").mkdir(exist_ok=True)
         (Path.cwd() / "combined_audio").mkdir(exist_ok=True)
         i = 0
@@ -86,9 +79,20 @@ class Ahmad(commands.Cog):
             await asyncio.sleep(2)
             vc.stop_listening()
             asyncio.get_event_loop().create_task(
-                speachToText(ctx, f"waves/wave{i}.wav", i)
+                speechToText(ctx, f"waves/wave{i}.wav", i, vc)
             )
             i += 1
+
+    @commands.command()
+    @commands.guild_only()
+    async def test(self, ctx):
+        voiceChannel = ctx.author.voice.channel
+        userTwo = (
+            voiceChannel.members[0]
+            if voiceChannel.members[1] == ctx.author
+            else ctx.author
+        )
+        await ctx.send(userTwo)
 
     @commands.command()
     @commands.guild_only()
